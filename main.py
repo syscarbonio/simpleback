@@ -67,3 +67,19 @@ async def submit_email(payload: EmailPayload):
             raise HTTPException(status_code=response.status_code, detail=response.text)
         
     return {"message": "Email submitted successfully"}
+
+@app.get("/email-count")
+async def get_email_count():
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"{SUPABASE_URL}/rest/v1/subscribers",
+            headers={
+                "apikey": SUPABASE_KEY,
+                "Authorization": f"Bearer {SUPABASE_KEY}"
+            }
+        )
+        if response.status_code != 200:
+            raise HTTPException(status_code=response.status_code, detail="Error fetching email count")
+        
+        emails = response.json()
+        return {"count": len(emails)}
