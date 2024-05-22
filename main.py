@@ -24,7 +24,7 @@ def read_item(item_id: int, q: Optional[str] = None):
 async def submit_email(payload: EmailPayload):
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            f"{SUPABASE_URL}/rest/v1/your_table_name",
+            f"{SUPABASE_URL}/rest/v1/subscribers",
             headers={
                 "Content-Type": "application/json",
                 "apikey": SUPABASE_KEY,
