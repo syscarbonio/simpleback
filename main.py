@@ -33,6 +33,27 @@ def read_item(item_id: int, q: Optional[str] = None):
 @app.post("/submit-email")
 async def submit_email(payload: EmailPayload):
     async with httpx.AsyncClient() as client:
+        # Check if email already exists
+        existing_email_response = await client.get(
+            f"{SUPABASE_URL}/rest/v1/subscribers",
+            headers={
+                "apikey": SUPABASE_KEY,
+                "Authorization": f"Bearer {SUPABASE_KEY}",
+            },
+            params={
+                "select": "email",
+                "email": f"eq.{payload.email}"
+            }
+        )
+        
+        if existing_email_response.status_code != 200:
+            raise HTTPException(status_code=existing_email_response.status_code, detail="Error checking existing email")
+        
+        existing_emails = existing_email_response.json()
+        if existing_emails:
+            return {"message": "Hey! Your email is already here!"}
+        
+        # Insert new email
         response = await client.post(
             f"{SUPABASE_URL}/rest/v1/subscribers",
             headers={
@@ -44,4 +65,5 @@ async def submit_email(payload: EmailPayload):
         )
         if response.status_code != 201:
             raise HTTPException(status_code=response.status_code, detail=response.text)
+        
     return {"message": "Email submitted successfully"}
